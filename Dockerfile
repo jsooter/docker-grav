@@ -1,11 +1,11 @@
-FROM nginx:1.11.9
+FROM nginx
 
 # Desired version of grav
 ARG GRAV_VERSION=1.1.16
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y sudo wget vim unzip php5 php5-curl php5-gd php-pclzip php5-fpm
+    apt-get install -y sudo wget vim unzip libpcre3 php7.0 php7.0-curl php7.0-gd php7.0-zip php7.0-fpm php7.0-mbstring php7.0-xml
 ADD https://github.com/krallin/tini/releases/download/v0.13.2/tini /usr/local/bin/tini
 RUN chmod +x /usr/local/bin/tini
 
@@ -15,9 +15,9 @@ USER www-data
 
 # Install grav
 WORKDIR /var/www
-RUN wget https://github.com/getgrav/grav/releases/download/$GRAV_VERSION/grav-admin-v$GRAV_VERSION.zip && \
-    unzip grav-admin-v$GRAV_VERSION.zip && \
-    rm grav-admin-v$GRAV_VERSION.zip && \
+RUN wget https://github.com/jsooter/grav-sample/archive/master.zip && \
+    unzip master.zip && \
+    mv grav-sample-master grav-admin && \
     cd grav-admin && \
     bin/gpm install -f -y admin
 
@@ -25,10 +25,11 @@ RUN wget https://github.com/getgrav/grav/releases/download/$GRAV_VERSION/grav-ad
 USER root
 
 # Install Acmetool Let's Encrypt client
-RUN echo 'deb http://ppa.launchpad.net/hlandau/rhea/ubuntu xenial main' > /etc/apt/sources.list.d/rhea.list \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9862409EF124EC763B84972FF5AC9651EDB58DFA \
-    && apt-get update \
-    && apt-get install acmetool
+#RUN echo 'deb http://ppa.launchpad.net/hlandau/rhea/ubuntu xenial main' > /etc/apt/sources.list.d/rhea.list \
+#    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9862409EF124EC763B84972FF5AC9651EDB58DFA \
+#    && apt-get update \
+#    && apt-get install gnupg acmetool
+RUN service php7.0-fpm start
 
 # Configure nginx with grav
 WORKDIR grav-admin
